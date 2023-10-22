@@ -1,32 +1,46 @@
-//#include <experimental/simd>
-#include <iostream>
-#include <thread>
-#include <vector>
-#include <math.h>
+//#include <immintrin.h> // SIMD AVX intel library
+//#include <ia32intrin.h> // SIMD SVML intel library
+#include <iostream> // io
+#include <thread> // Multi-threading
+#include <vector> // Vectors
+#include <math.h> // Mathematics functions
 
+/**
+ * ... "documentation will come"
+ * 
+ * @author J.J.Buitenhuis
+ * @version 0.0
+ * @since 0.0
+*/
 class Goldbach{
     public:
+        /**
+         * Constructor for the Goldbach class
+         * 
+         * @param max the maximum value calculated
+         * @param threads the amount of CPU threads used for calculations
+        */
         Goldbach(int max, int threads){
             THREADS = threads;
             MAX = max;
         }
         // FUNCTIONS
         void gen_primes();
-        void cache_primes();
         void write_cache();
-        bool prime_v(int);
 
     private:
         // VARIABLES
         int MAX;
         int THREADS = 1;
-        int SECTIONS;
-        int CURRENT_SET = 2;
         int p = 7;
+        //int SECTIONS;
+        //int CURRENT_SET = 2;
 
         std::vector<int> CACHE;
 
         // FUNCTIONS
+        void cache_primes();
+        bool prime_v(int);
 
         // DEBUG
 };
@@ -86,7 +100,8 @@ void Goldbach::write_cache(){
 
 int main(){
     int num = 10000000;
-    Goldbach goldbach(num, 8);
+    int amount_of_threads = 8;
+    Goldbach goldbach(num, amount_of_threads);
     goldbach.gen_primes();
     //goldbach.write_cache();
 }
