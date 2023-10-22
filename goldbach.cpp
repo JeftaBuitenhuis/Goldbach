@@ -6,7 +6,7 @@
 #include <math.h> // Mathematics functions
 
 /**
- * ... "documentation will come"
+ * A class for calculating goldbach.
  * 
  * @author J.J.Buitenhuis
  * @version 0.0
@@ -23,40 +23,83 @@ class Goldbach{
         Goldbach(int max, int threads){
             THREADS = threads;
             MAX = max;
+            CACHE = new bool[max];
         }
         // FUNCTIONS
         void gen_primes();
         void write_cache();
-
+        void initialize_threads();
     private:
         // VARIABLES
         int MAX;
         int THREADS = 1;
         int NUM = 7;
         //int SECTIONS;
-        //int CURRENT_SET = 2;
+        int CURRENT_NUM = 2;
 
-        std::vector<int> CACHE;
+        bool *CACHE;
 
         // FUNCTIONS
         void cache_primes();
         bool is_prime(int);
+        int next_num();
+        void solve_goldbach(int);
+        void balance_load();
 
         // DEBUG
 };
 
 //----------------------------------------------------// Goldbach
 
+void Goldbach::solve_goldbach(int num){
+    bool stop = false;
+    int i = 2;
+    while (!stop){
+        //std::cout << i << " " << num << "\n";
+        stop = (CACHE[i] && CACHE[num-i]);
+        i++;
+    }
+    //std::cout << num << ": " << (i-1) << " + " << num-(i-1) << "\n";
+} 
+
+void Goldbach::initialize_threads(){
+    std::vector<std::thread> thread_vector;
+
+    for (int thread = 0; thread < this->THREADS; thread++){
+        thread_vector.emplace_back([&](){balance_load();});
+    }
+
+    for(auto& t: thread_vector){
+        t.join();
+    }
+}
+
+// void BalanceLoad()
+void Goldbach::balance_load(){
+    int n = next_num();
+
+    while (n > 0){
+        solve_goldbach(n);
+        n = next_num();
+    }
+}
+
+int Goldbach::next_num(){
+    CURRENT_NUM += 2;
+    if (CURRENT_NUM > MAX){
+        return 0;
+    }
+    return CURRENT_NUM;
+}
 
 
 //----------------------------------------------------// Primes
 
 void Goldbach::gen_primes(){
-    CACHE.reserve(MAX);
-    CACHE.emplace_back(2);
-    CACHE.emplace_back(3);
-    CACHE.emplace_back(5);
-    CACHE.emplace_back(7);
+    CACHE[2] = true;
+    CACHE[3] = true;
+    CACHE[5] = true;
+    CACHE[7] = true;
     std::vector<std::thread> thread_vector;
 
     for (int thread = 0; thread < THREADS; thread++){
@@ -70,9 +113,7 @@ void Goldbach::gen_primes(){
 void Goldbach::cache_primes(){
     int n = (NUM += 2);
     while (NUM < MAX){
-        if (is_prime(n)){
-            CACHE.emplace_back(n);
-        }
+        CACHE[n] = is_prime(n);
         n = NUM += 2;
     }
 }
@@ -89,19 +130,23 @@ bool Goldbach::is_prime(int n){
 }
 
 void Goldbach::write_cache(){
-    int max = CACHE.size();
-    for (int i = 0; i < max; i++){
-        std::cout << CACHE[i] << "\n";
+    int amount = 0;
+    for (int i = 0; i < MAX; i++){
+        if (CACHE[i]) {
+            amount++;
+        }
+        std::cout << i << " = " <<CACHE[i] << "\n";
     }
-    std::cout << max << "\n";
+    std::cout << amount << "\n";
 }
 
 //---------------------------------------------------------------// Main
 
 int main(){
-    int num = 10000000;
-    int amount_of_threads = 1;
+    int num = 1000000000;
+    int amount_of_threads = 8;
     Goldbach goldbach(num, amount_of_threads);
     goldbach.gen_primes();
-    goldbach.write_cache();
+    goldbach.initialize_threads();
+    //goldbach.write_cache();
 }
