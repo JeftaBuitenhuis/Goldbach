@@ -9,7 +9,7 @@
  * A class for calculating goldbach.
  * 
  * @author J.J.Buitenhuis
- * @version 0.0
+ * @version 0.1
  * @since 0.0
 */
 class Goldbach{
@@ -55,7 +55,6 @@ void Goldbach::solve_goldbach(int num){
     bool stop = false;
     int i = 2;
     while (!stop){
-        //std::cout << i << " " << num << "\n";
         stop = (CACHE[i] && CACHE[num-i]);
         i++;
     }
