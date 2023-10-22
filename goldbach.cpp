@@ -32,7 +32,7 @@ class Goldbach{
         // VARIABLES
         int MAX;
         int THREADS = 1;
-        int p = 7;
+        int NUM = 7;
         //int SECTIONS;
         //int CURRENT_SET = 2;
 
@@ -40,7 +40,7 @@ class Goldbach{
 
         // FUNCTIONS
         void cache_primes();
-        bool prime_v(int);
+        bool is_prime(int);
 
         // DEBUG
 };
@@ -68,16 +68,16 @@ void Goldbach::gen_primes(){
 }
 
 void Goldbach::cache_primes(){
-    int n = p += 2;
-    while (n < MAX){
-        if (prime_v(n)){
+    int n = (NUM += 2);
+    while (NUM < MAX){
+        if (is_prime(n)){
             CACHE.emplace_back(n);
         }
-        n = p += 2;
+        n = NUM += 2;
     }
 }
 
-bool Goldbach::prime_v(int n){
+bool Goldbach::is_prime(int n){
     int sqrt_n = std::sqrt(n);
     int i = 5;
     bool mod_z = (n % 3);
@@ -100,8 +100,8 @@ void Goldbach::write_cache(){
 
 int main(){
     int num = 10000000;
-    int amount_of_threads = 8;
+    int amount_of_threads = 1;
     Goldbach goldbach(num, amount_of_threads);
     goldbach.gen_primes();
-    //goldbach.write_cache();
+    goldbach.write_cache();
 }
