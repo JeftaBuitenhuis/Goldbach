@@ -1,12 +1,8 @@
-#include <experimental/simd>
+//#include <experimental/simd>
 #include <iostream>
 #include <thread>
 #include <vector>
 #include <math.h>
-
-namespace stdx = std::experimental;
-
-using int_vec8 = std::experimental::fixed_size_simd<int,8>;
 
 class Goldbach{
     public:
@@ -17,7 +13,7 @@ class Goldbach{
         // FUNCTIONS
         void gen_primes();
         void cache_primes();
-        void WriteCache();
+        void write_cache();
         bool prime_v(int);
 
     private:
@@ -31,8 +27,6 @@ class Goldbach{
         std::vector<int> CACHE;
 
         // FUNCTIONS
-        int next_p();
-        int int_vec8_to_int(int_vec8);
 
         // DEBUG
 };
@@ -80,7 +74,7 @@ bool Goldbach::prime_v(int n){
     return mod_z;
 }
 
-void Goldbach::WriteCache(){
+void Goldbach::write_cache(){
     int max = CACHE.size();
     for (int i = 0; i < max; i++){
         std::cout << CACHE[i] << "\n";
@@ -91,8 +85,8 @@ void Goldbach::WriteCache(){
 //---------------------------------------------------------------// Main
 
 int main(){
-    int num = 10000;
+    int num = 10000000;
     Goldbach goldbach(num, 8);
     goldbach.gen_primes();
-    goldbach.WriteCache();
+    //goldbach.write_cache();
 }
