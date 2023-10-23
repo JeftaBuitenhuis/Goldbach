@@ -9,7 +9,7 @@
  * A class for calculating goldbach.
  * 
  * @author J.J.Buitenhuis
- * @version 0.1
+ * @version 0.2
  * @since 0.0
 */
 class Goldbach{
