@@ -24,6 +24,7 @@ class Goldbach{
             THREADS = threads;
             MAX = max;
             CACHE = new bool[max];
+            CURRENT_NUM = MAX;
         }
         // FUNCTIONS
         void gen_primes();
@@ -77,17 +78,14 @@ void Goldbach::initialize_threads(){
 void Goldbach::balance_load(){
     int n = next_num();
 
-    while (n > 0){
+    while (n >= 4){
         solve_goldbach(n);
         n = next_num();
     }
 }
 
 int Goldbach::next_num(){
-    CURRENT_NUM += 2;
-    if (CURRENT_NUM > MAX){
-        return 0;
-    }
+    CURRENT_NUM -= 2;
     return CURRENT_NUM;
 }
 
@@ -142,7 +140,7 @@ void Goldbach::write_cache(){
 //---------------------------------------------------------------// Main
 
 int main(){
-    int num = 1000000000;
+    int num = 100000000;
     int amount_of_threads = 8;
     Goldbach goldbach(num, amount_of_threads);
     goldbach.gen_primes();
