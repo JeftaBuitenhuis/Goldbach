@@ -1,5 +1,6 @@
 //#include <immintrin.h> // SIMD AVX intel library
 //#include <ia32intrin.h> // SIMD SVML intel library
+#include <atomic> // atomic
 #include <iostream> // io
 #include <thread> // Multi-threading
 #include <vector> // Vectors
@@ -34,16 +35,14 @@ class Goldbach{
         // VARIABLES
         int MAX;
         int THREADS = 1;
-        int NUM = 7;
+        std::atomic_int NUM = 7;
         //int SECTIONS;
         int CURRENT_NUM = 2;
-
         bool *CACHE;
 
         // FUNCTIONS
         void cache_primes();
         bool is_prime(int);
-        int next_num();
         void solve_goldbach(int);
         void balance_load();
 
@@ -76,17 +75,12 @@ void Goldbach::initialize_threads(){
 
 // void BalanceLoad()
 void Goldbach::balance_load(){
-    int n = next_num();
+    int n = (CURRENT_NUM -= 2);
 
     while (n >= 4){
         solve_goldbach(n);
-        n = next_num();
+        n = (CURRENT_NUM -= 2);
     }
-}
-
-int Goldbach::next_num(){
-    CURRENT_NUM -= 2;
-    return CURRENT_NUM;
 }
 
 
@@ -140,7 +134,7 @@ void Goldbach::write_cache(){
 //---------------------------------------------------------------// Main
 
 int main(){
-    int num = 100000000;
+    int num = 10000000;
     int amount_of_threads = 8;
     Goldbach goldbach(num, amount_of_threads);
     goldbach.gen_primes();
