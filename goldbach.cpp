@@ -5,6 +5,7 @@
 #include <thread> // Multi-threading
 #include <vector> // Vectors
 #include <math.h> // Mathematics functions
+#include <tuple> // tuple
 
 /**
  * A class for calculating goldbach.
@@ -24,12 +25,14 @@ class Goldbach{
         Goldbach(int max, int threads){
             THREADS = threads;
             MAX = max;
-            CACHE = new bool[max];
+            CACHE_P = new bool[max];
+            CACHE_G = new int[max];
             CURRENT_NUM = MAX;
         }
         // FUNCTIONS
         void gen_primes();
-        void write_cache();
+        void write_cache_p();
+        void write_cache_g();
         void initialize_threads();
     private:
         // VARIABLES
@@ -37,8 +40,9 @@ class Goldbach{
         int THREADS = 1;
         std::atomic_int NUM = 7;
         //int SECTIONS;
-        int CURRENT_NUM = 2;
-        bool *CACHE;
+        std::atomic_int CURRENT_NUM = 2;
+        bool *CACHE_P;
+        
 
         // FUNCTIONS
         void cache_primes();
@@ -46,19 +50,22 @@ class Goldbach{
         void solve_goldbach(int);
         void balance_load();
 
-        // DEBUG
+        // OUTPUT
+        int *CACHE_G;
 };
 
 //----------------------------------------------------// Goldbach
 
 void Goldbach::solve_goldbach(int num){
-    bool stop = false;
     int i = 2;
+    bool stop = (CACHE_P[i] && CACHE_P[num-i]);
+    i--;
     while (!stop){
-        stop = (CACHE[i] && CACHE[num-i]);
-        i++;
+        i+=2;
+        stop = (CACHE_P[i] && CACHE_P[num-i]);
     }
-    //std::cout << num << ": " << (i-1) << " + " << num-(i-1) << "\n";
+    CACHE_G[num] = num-i;
+    CACHE_G[num + 1] = i;
 } 
 
 void Goldbach::initialize_threads(){
@@ -87,14 +94,14 @@ void Goldbach::balance_load(){
 //----------------------------------------------------// Primes
 
 void Goldbach::gen_primes(){
-    CACHE[2] = true;
-    CACHE[3] = true;
-    CACHE[5] = true;
-    CACHE[7] = true;
+    CACHE_P[2] = true;
+    CACHE_P[3] = true;
+    CACHE_P[5] = true;
+    CACHE_P[7] = true;
     std::vector<std::thread> thread_vector;
 
     for (int thread = 0; thread < THREADS; thread++){
-        thread_vector.emplace_back([&](){cache_primes();});
+        thread_vector.emplace_back([&](){(cache_primes());});
     }
     for(auto& t: thread_vector){
         t.join();
@@ -104,7 +111,7 @@ void Goldbach::gen_primes(){
 void Goldbach::cache_primes(){
     int n = (NUM += 2);
     while (NUM < MAX){
-        CACHE[n] = is_prime(n);
+        CACHE_P[n] = is_prime(n);
         n = NUM += 2;
     }
 }
@@ -120,15 +127,32 @@ bool Goldbach::is_prime(int n){
     return mod_z;
 }
 
-void Goldbach::write_cache(){
+//----------------------------------------------------------------// Debug
+
+void Goldbach::write_cache_p(){
     int amount = 0;
     for (int i = 0; i < MAX; i++){
-        if (CACHE[i]) {
+        if (CACHE_P[i]) {
             amount++;
         }
-        std::cout << i << " = " <<CACHE[i] << "\n";
+        std::cout << i << " = " << CACHE_P[i] << "\n";
     }
     std::cout << amount << "\n";
+}
+
+void Goldbach::write_cache_g(){
+    int i_one_high = 0;
+    int i_two_high = 0;
+    for (int i = 4; i < MAX; i += 2){
+        std::cout << i << " = " << CACHE_G[i] << " + " << CACHE_G[i+1]  << "\n";
+        if (i_one_high < CACHE_G[i]){
+            i_one_high = CACHE_G[i];
+        }
+        if (i_two_high < CACHE_G[i+1]){
+            i_two_high = CACHE_G[i+1];
+        }
+    }
+    std::cout << "i_one_h: " << i_one_high << ", i_two_h: " << i_two_high << "\n";
 }
 
 //---------------------------------------------------------------// Main
@@ -139,5 +163,6 @@ int main(){
     Goldbach goldbach(num, amount_of_threads);
     goldbach.gen_primes();
     goldbach.initialize_threads();
-    //goldbach.write_cache();
+    goldbach.write_cache_g();
+    //goldbach.write_cache_p();
 }
